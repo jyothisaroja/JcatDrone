@@ -1,0 +1,407 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>drone</artifactId>
+    <name>drone</name>
+
+        <groupId>come</groupId>
+        <version>1.1.1</version>
+
+    <properties>
+        <jcat.version>R5A0050</jcat.version>
+        <rabbitmq.client.version>3.0.1</rabbitmq.client.version>
+        <dmx.extensions.api.version>0.0.2</dmx.extensions.api.version>
+        <library.broker.version>1.0.5</library.broker.version>
+        <configurationfacade.version>3.0.0-beta5</configurationfacade.version>
+        <powermock.version>1.6.2</powermock.version>
+        <remotecli.version>1.8.35</remotecli.version>
+        <extreme.version>0.0.2</extreme.version>
+        <maven.javadoc.version>2.8.1</maven.javadoc.version>
+        <maven.site.version>3.0</maven.site.version>
+        <jackson.version>1.9.13</jackson.version>
+        <aspectj.version>1.8.6</aspectj.version>
+        <commons-io.version>2.4</commons-io.version>
+        <mockito.version>1.10.18</mockito.version>
+        <aspectj.maven.plugin.version>1.5</aspectj.maven.plugin.version>
+        <maven.assembly.version>2.4</maven.assembly.version>
+        <site.webserver.path>/proj/telcodc/webdocs/cloud-docs/testspecs/</site.webserver.path>
+        <docgen.version>2.2.4</docgen.version>
+        <maven.teststatistics.version>0.0.1</maven.teststatistics.version>
+        <maven.antrun.version>1.6</maven.antrun.version>
+        <sshj.version>0.9.0</sshj.version>
+        <jcat.ebs.bsp.netconfapi.version>0.0.133</jcat.ebs.bsp.netconfapi.version>
+        <maven.surefire.version>2.17</maven.surefire.version>
+        <maven.failsafe.version>2.17</maven.failsafe.version>
+        <openstack4j.version>3.1.1-20181113.075505-6</openstack4j.version>
+        <openstack4j.jersey2.version>3.0.5-20170615.072938-4</openstack4j.jersey2.version>
+        <jacoco.version>0.7.5.201505241946</jacoco.version>
+        <junit.version>4.10</junit.version>
+        <guice.version>4.0</guice.version>
+        <gson.version>2.8.2</gson.version>
+    </properties>
+<dependencies>
+<dependency>
+<groupId>org.testng</groupId>
+                    <artifactId>testng</artifactId>
+<version>6.9.10</version>
+</dependency>
+</dependencies>
+    <build>
+    <!-- <pluginManagement>
+    plugin Management seems to keep assembly plugin from working -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven.site.version}</version>
+                <configuration>
+                    <reportPlugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <version>${maven.javadoc.version}</version>
+                            <configuration>
+                                <sourcepath>src/main/java</sourcepath>
+                                <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+                                <destDir>EcsJcatTestsJavaDocs</destDir>
+                            </configuration>
+                        </plugin>
+                    </reportPlugins>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <doclet>se.ericsson.jcat.fw.generators.TestSpecificationDoclet</doclet>
+                            <docletPath>${basedir}/target/classes</docletPath>
+                            <docletArtifact>
+                                <groupId>se.ericsson.jcat.docgenerator</groupId>
+                                <artifactId>docgenerator</artifactId>
+                                <version>${docgen.version}</version>
+                            </docletArtifact>
+                            <additionalparam>-template general.xml
+                                -outputfile ""
+                                -generators
+                                all -multidoc</additionalparam>
+                            <useStandardDocletOptions>false</useStandardDocletOptions>
+                            <sourcepath>src/systemtest/java</sourcepath>
+                            <subpackages>com.jcat.cloud.tests</subpackages>
+                            <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+                            <destDir>TestSpecifications</destDir>
+                            <name>Test Specification</name>
+                            <description>ECS JCAT</description>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <!-- Sets the VM argument line used when unit tests are run. Also Set
+                        argument needed for power mock -->
+                    <argLine>${surefireArgLine}</argLine>
+                    <configfailurepolicy>continue</configfailurepolicy>
+                    <systemPropertyVariables>
+                        <!-- set root logger to off during unit test -->
+                        <log4j.configuration>log4j-silent.properties</log4j.configuration>
+                    </systemPropertyVariables>
+                    <excludes>
+                        <exclude>com/jcat/cloud/tests/**</exclude>
+                        <exclude>com/jcat/ecs/examples/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <!-- Prepares the property pointing to the JaCoCo runtime agent which
+                        is passed as VM argument when Maven the Surefire plugin is executed. -->
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${sonar.jacoco.reportPath}</destFile>
+                            <!-- Sets the name of the property containing the settings for JaCoCo
+                                runtime agent. -->
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- Ensures that the code coverage report for unit tests is created
+                        after unit tests have been run. -->
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${sonar.jacoco.reportPath}</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                            <excludes>
+                                <exclude>com/jcat/cloud/tests/**</exclude>
+                                <exclude>com/jcat/ecs/examples/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <!-- Prepares the property pointing to the JaCoCo runtime agent which
+                        is passed as VM argument when Maven the Failsafe plugin is executed. -->
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${sonar.jacoco.itReportPath}</destFile>
+                            <!-- Sets the name of the property containing the settings for JaCoCo
+                                runtime agent. -->
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- Ensures that the code coverage report for integration tests after
+                        integration tests have been run. -->
+                    <execution>
+                        <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${sonar.jacoco.itReportPath}</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+                            <excludes>
+                                <exclude>com/jcat/cloud/tests/**</exclude>
+                                <exclude>com/jcat/ecs/examples/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- this plugin is used for adding extra source folders -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.9.1</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/systemtest/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven.failsafe.version}</version>
+                <configuration>
+                      <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>se.ericsson.jcat.fw.fixture.testng.JcatNGTestListener,se.ericsson.jcat.fw.fixture.testng.JcatNGSuiteListener</value>
+                        </property>
+                    </properties>
+                    <excludes>
+
+                        <exclude>**/BspNetconfLibIT.java</exclude>
+                        <exclude>**/OpenStackGlanceIT.java</exclude>
+                        <exclude>**/OpenStackNovaIT.java</exclude>
+                        <exclude>com/jcat/cloud/tests/**</exclude>
+                        <exclude>com/jcat/ecs/examples/**</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>failsafe-integration-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the VM argument line used when integration tests are run. -->
+                            <argLine>${failsafeArgLine}</argLine>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>se.ericsson.jcat.fw.fixture.testng.JcatNGTestListener,se.ericsson.jcat.fw.fixture.testng.JcatNGSuiteListener</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- this plugin is used for updating dependencies -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+         </plugins>
+         <!-- </pluginManagement> -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </testResource>
+        </testResources>
+              <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings
+                    only. It has no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.jacoco</groupId>
+                                        <artifactId>jacoco-maven-plugin</artifactId>
+                                        <versionRange>[${jacoco.version},)</versionRange>
+                                        <goals>
+                                            <goal>prepare-agent</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.codehaus.mojo
+                                        </groupId>
+                                        <artifactId>
+                                            build-helper-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.9.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>add-source</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>generateStatistics</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.jcat.ecs</groupId>
+                        <artifactId>teststatistics-maven-plugin</artifactId>
+                        <version>${maven.teststatistics.version}</version>
+                        <executions>
+                            <execution>
+                                <id>generateteststatistics</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>generateteststatistics</goal>
+                                </goals>
+                                <configuration>
+                                    <mBasePackage>com${file.separator}jcat${file.separator}ecs${file.separator}tests</mBasePackage>
+                                    <mTestSuperClass>com.jcat.ecs.JcatTelcoDcTestCase</mTestSuperClass>
+                                    <mStatisticFileNamePostfix>TestStatistics.html</mStatisticFileNamePostfix>
+                                    <mOutputDirectory>${basedir}${file.separator}target${file.separator}html</mOutputDirectory>
+                                    <mIgnoredPackages>
+                                        <mIgnoredPackage>examples</mIgnoredPackage>
+                                        <mIgnoredPackage>common</mIgnoredPackage>
+                                        <mIgnoredPackage>tools</mIgnoredPackage>
+                                    </mIgnoredPackages>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven.antrun.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepareForDeploy</id>
+                                <configuration>
+                                    <tasks>
+                                        <copy todir="${basedir}/target/site/TestStatistics">
+                                            <fileset dir="${basedir}/target/html">
+                                                <include name="*.html" />
+                                            </fileset>
+                                        </copy>
+                                    </tasks>
+                                </configuration>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
+
