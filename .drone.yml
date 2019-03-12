@@ -3,4 +3,4 @@ pipeline:
      image: maven
      commands:
        - mvn -version
-       - mvn clean verify
+       - mvn clean test
